@@ -1,30 +1,35 @@
-const playwright = require('@playwright/test');
+import * as playwright from '@playwright/test';
+import loginPage from '../pages/loginPage.js';
+import users from '../data/users.js';
 
 const test = playwright.test;
 const expect = playwright.expect;
 
 test(
     'User can login successfully',
+    async function({page}) {
 
-    async function({ page }) {
+        await loginPage.open(page);
 
-        await page.goto('https://www.saucedemo.com');
+        await loginPage.login(page, users.validUser.username, users.validUser.password);
 
-        await page
-            .getByPlaceholder('Username')
-            .fill('standard_user');
+        await expect(page.getByText('Products')).toBeVisible();
 
-        await page
-            .getByPlaceholder('Password')
-            .fill('secret_sauce');
-
-        await page
-            .getByRole('button', { name: 'Login' })
-            .click();
-
-        await expect(
-            page.getByText('Products')
-        ).toBeVisible();
-
+        console.log('Login test completed successfully');
     }
 );
+
+
+test(
+    'User cannot login with invalid credentials',
+    async function({page}) {
+
+        await loginPage.open(page);
+
+        await loginPage.login(page, users.invalidUser.username, users.invalidUser.password);
+
+        await expect(page.getByText('Epic sadface: Username and password do not match any user in this service')).toBeVisible();
+
+        console.log('Invalid login test completed successfully');
+    }
+)
